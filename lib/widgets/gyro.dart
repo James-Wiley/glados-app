@@ -5,6 +5,13 @@ class GyroPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Gyro Page')));
+    return Container(
+      color: const Color(0xFFE8F0FE),
+      alignment: Alignment.center,
+      child: const Text(
+        'Gyro Page',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+      ),
+    );
   }
 }

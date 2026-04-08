@@ -5,6 +5,13 @@ class AnimationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Animation Page')));
+    return Container(
+      color: const Color(0xFFFFF3E6),
+      alignment: Alignment.center,
+      child: const Text(
+        'Animation Page',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+      ),
+    );
   }
 }

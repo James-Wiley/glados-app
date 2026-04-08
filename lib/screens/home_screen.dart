@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../utils/robot_comm.dart';
 import '../widgets/sliders.dart';
 import '../widgets/gyro.dart';
 import '../widgets/animation.dart';
@@ -12,35 +14,71 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late final robot = RobotArmService.instance;
   bool isConnected = false;
-  bool bypassConnection = false; // flip this for testing
+  String? connectionError;
   int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    waitForConnection();
+    _initConnection();
   }
 
-  Future<void> waitForConnection() async {
-    if (bypassConnection) {
-      setState(() => isConnected = true);
+  Future<void> _initConnection() async {
+    // Listen to connection state from RobotArmService
+    robot.connectionStream.listen((connected) {
+      setState(() {
+        isConnected = connected;
+        if (connected) connectionError = null;
+      });
+    });
+
+    // Ask for all required permissions immediately at startup.
+    final permissionResult = await robot.ensurePermissions();
+    if (!permissionResult.ok) {
+      if (mounted) {
+        setState(() => connectionError = permissionResult.error);
+      }
       return;
     }
 
-    while (!isConnected) {
-      bool result = await checkConnection();
-      if (result) {
-        setState(() => isConnected = true);
-        break;
+    // Attempt initial connection
+    final result = await robot.connect();
+    if (!result.ok) {
+      if (mounted) {
+        setState(() => connectionError = result.error);
       }
-      await Future.delayed(const Duration(seconds: 1));
+    } else {
+      if (mounted) {
+        setState(() => connectionError = null);
+      }
     }
   }
 
-  Future<bool> checkConnection() async {
-    // TODO: implement bluetooth connection check
-    return false;
+  Future<void> _retryConnection() async {
+    setState(() => connectionError = null);
+
+    final permissionResult = await robot.ensurePermissions();
+    if (!permissionResult.ok) {
+      if (mounted) {
+        setState(() => connectionError = permissionResult.error);
+      }
+      return;
+    }
+
+    final result = await robot.connect();
+    if (!result.ok) {
+      if (mounted) {
+        setState(() => connectionError = result.error);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    robot.dispose();
+    super.dispose();
   }
 
   final List<Widget> pages = const [
@@ -53,6 +91,47 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (!isConnected) {
+      if (connectionError != null) {
+        return Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Connection Failed',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    connectionError!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _retryConnection,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      openAppSettings();
+                    },
+                    icon: const Icon(Icons.settings),
+                    label: const Text('Open App Settings'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
       return const Scaffold(
         body: Center(child: Text('Waiting for robot connection...')),
       );
