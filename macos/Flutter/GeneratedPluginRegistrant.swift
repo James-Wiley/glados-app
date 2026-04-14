@@ -6,7 +6,9 @@ import FlutterMacOS
 import Foundation
 
 import flutter_blue_plus_darwin
+import hand_detection
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterBluePlusPlugin.register(with: registry.registrar(forPlugin: "FlutterBluePlusPlugin"))
+  HandDetectionPlugin.register(with: registry.registrar(forPlugin: "HandDetectionPlugin"))
 }

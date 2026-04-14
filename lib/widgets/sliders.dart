@@ -22,6 +22,16 @@ class _SlidersPageState extends State<SlidersPage> {
     robot.setServoAngles(_servoValues);
   }
 
+  void _resetAllServos() {
+    setState(() {
+      for (int i = 0; i < _servoValues.length; i++) {
+        _servoValues[i] = 90;
+      }
+    });
+
+    robot.setServoAngles(_servoValues);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -70,6 +80,15 @@ class _SlidersPageState extends State<SlidersPage> {
             ),
             if (i < 3) const SizedBox(height: 10),
           ],
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _resetAllServos,
+              icon: const Icon(Icons.restart_alt),
+              label: const Text('Reset All To 90°'),
+            ),
+          ),
         ],
       ),
     );

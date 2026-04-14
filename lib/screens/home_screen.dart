@@ -75,6 +75,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _bypassConnection() {
+    robot.bypassConnection();
+    setState(() {
+      isConnected = true;
+      connectionError = null;
+    });
+  }
+
   @override
   void dispose() {
     robot.dispose();
@@ -124,6 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     icon: const Icon(Icons.settings),
                     label: const Text('Open App Settings'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _bypassConnection,
+                    icon: const Icon(Icons.skip_next),
+                    label: const Text('Bypass (Test Mode)'),
                   ),
                 ],
               ),

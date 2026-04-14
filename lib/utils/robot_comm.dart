@@ -45,6 +45,7 @@ class RobotArmService {
   final _connectedController = StreamController<bool>.broadcast();
   Stream<bool> get connectionStream => _connectedController.stream;
   bool _connected = false;
+  bool _bypassMode = false;
   String _lastScanDebugSummary = 'No scan results captured yet.';
 
   // ── 1. Connectivity ────────────────────────────────────────────────────────
@@ -76,6 +77,9 @@ class RobotArmService {
   /// Returns true if the BLE link is currently up and characteristics
   /// are resolved.
   bool get isConnected => _connected && _device != null;
+
+  /// Returns true if robot connection was bypassed (all commands do nothing).
+  bool get isConnectionBypassed => _bypassMode;
 
   /// Request required Bluetooth permissions (Android 12+).
   Future<RobotResult<void>> _requestBluetoothPermissions() async {
@@ -143,7 +147,12 @@ class RobotArmService {
       // Scan with service filtering first, then fallback to unfiltered scan.
       // Some Android stacks report no results when service filtering is used.
       BluetoothDevice? found;
-      final targetService = _normalizeUuid(RobotUuids.service);
+      final targetUuids = <String>{
+        _normalizeUuid(RobotUuids.service),
+        _normalizeUuid(RobotUuids.servoCmd),
+        _normalizeUuid(RobotUuids.rgbLed),
+        _normalizeUuid(RobotUuids.status),
+      };
       final debugLines = <String>[];
 
       Future<void> runScan({required bool filtered}) async {
@@ -167,7 +176,8 @@ class RobotArmService {
             debugLines.add(debugLine);
             print(debugLine);
 
-            if (uuids.contains(targetService)) {
+            // Match if any of the target UUIDs are found
+            if (uuids.any((uuid) => targetUuids.contains(uuid))) {
               found = r.device;
               FlutterBluePlus.stopScan();
               break;
@@ -254,7 +264,16 @@ class RobotArmService {
     await _device?.disconnect();
     _device = null;
     _connected = false;
+    _bypassMode = false;
     _connectedController.add(false);
+  }
+
+  /// Bypass the robot connection. All commands will succeed but do nothing.
+  /// Useful for testing the UI without a physical robot.
+  void bypassConnection() {
+    _bypassMode = true;
+    _connected = true;
+    _connectedController.add(true);
   }
 
   /// Stream of status JSON maps pushed by the robot at 1 Hz.
@@ -271,13 +290,12 @@ class RobotArmService {
 
   /// Sends target angles for all 4 servos.
   ///
-  /// [angles] – list of exactly 4 values in degrees (0–180).
-  ///   Pass -1 for any joint you want to leave unchanged.
+  /// [angles] – list of exactly 4 values in degrees (0 to 180).
   /// [speeds] – optional list of 4 speed scalars (0.0–1.0, default 1.0).
   ///
   /// Example:
   ///   await robot.setServoAngles([90, 45, 120, 10]);
-  ///   await robot.setServoAngles([90, -1, -1, -1]); // rotate base only
+  ///   await robot.setServoAngles([45, 90, 135, 180]);
   Future<RobotResult<void>> setServoAngles(
     List<double> angles, {
     List<double> speeds = const [1.0, 1.0, 1.0, 1.0],
@@ -285,14 +303,17 @@ class RobotArmService {
     assert(angles.length == 4, 'angles must have exactly 4 elements');
     assert(speeds.length == 4, 'speeds must have exactly 4 elements');
 
+    // In bypass mode, succeed silently
+    if (_bypassMode) {
+      return const RobotResult.success(null);
+    }
+
     if (!isConnected || _servoChar == null) {
       return const RobotResult.failure('Not connected');
     }
 
-    // Clamp angles to valid range (pass -1 through unchanged)
-    final clamped = angles
-        .map((a) => a < 0 ? -1.0 : a.clamp(0.0, 180.0))
-        .toList();
+    // Clamp angles to the supported range.
+    final clamped = angles.map((a) => a.clamp(0.0, 180.0)).toList();
     final clampedSpeeds = speeds.map((s) => s.clamp(0.0, 1.0)).toList();
 
     final payload = jsonEncode({'angles': clamped, 'speeds': clampedSpeeds});
@@ -322,6 +343,11 @@ class RobotArmService {
     required int g,
     required int b,
   }) async {
+    // In bypass mode, succeed silently
+    if (_bypassMode) {
+      return const RobotResult.success(null);
+    }
+
     if (!isConnected || _ledChar == null) {
       return const RobotResult.failure('Not connected');
     }
