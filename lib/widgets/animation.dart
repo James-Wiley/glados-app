@@ -6,11 +6,35 @@ class AnimationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFFFF3E6),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0C1119), Color(0xFF121B29)],
+        ),
+      ),
       alignment: Alignment.center,
-      child: const Text(
-        'Animation Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.science_outlined, color: Color(0xFF6FE6FF), size: 42),
+              const SizedBox(height: 10),
+              Text(
+                'TEST CHAMBER SEQUENCER',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Queue scripted procedures and compliance cycles for subject trials.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF9FB1C8)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

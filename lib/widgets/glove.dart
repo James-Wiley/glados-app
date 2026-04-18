@@ -403,7 +403,7 @@ class _GlovePageState extends State<GlovePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const _ControlTag(label: 'Camera'),
+                    const _ControlTag(label: 'Optics'),
                     const SizedBox(width: 8),
                     _ViewControlButton(
                       icon: Icons.rotate_left,
@@ -434,7 +434,7 @@ class _GlovePageState extends State<GlovePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const _ControlTag(label: 'Hand'),
+                    const _ControlTag(label: 'Manipulator'),
                     const SizedBox(width: 8),
                     _ViewControlButton(
                       icon: Icons.rotate_left,
@@ -470,18 +470,17 @@ class _GlovePageState extends State<GlovePage> {
           right: 12,
           bottom: 12,
           child: Card(
-            color: Colors.black87,
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Text(
                 _curls.isEmpty
-                    ? 'No hand'
-                    : 'Thumb ${(100 * _curls['thumb']!).toStringAsFixed(0)}%  |  '
-                          'Index ${(100 * _curls['index']!).toStringAsFixed(0)}%  |  '
-                          'Middle ${(100 * _curls['middle']!).toStringAsFixed(0)}%  |  '
-                          'Ring ${(100 * _curls['ring']!).toStringAsFixed(0)}%  |  '
-                          'Pinky ${(100 * _curls['pinky']!).toStringAsFixed(0)}%',
-                style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ? 'No test subject tracked'
+                    : 'Thumb actuator ${(100 * _curls['thumb']!).toStringAsFixed(0)}%  |  '
+                          'Index actuator ${(100 * _curls['index']!).toStringAsFixed(0)}%  |  '
+                          'Middle actuator ${(100 * _curls['middle']!).toStringAsFixed(0)}%  |  '
+                          'Ring actuator ${(100 * _curls['ring']!).toStringAsFixed(0)}%  |  '
+                          'Pinky actuator ${(100 * _curls['pinky']!).toStringAsFixed(0)}%',
+                style: const TextStyle(color: Color(0xFFD5E3F5), fontSize: 12),
               ),
             ),
           ),
@@ -505,7 +504,7 @@ class _ViewControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black54,
+      color: const Color(0xCC172130),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -514,7 +513,7 @@ class _ViewControlButton extends StatelessWidget {
           message: tooltip,
           child: Padding(
             padding: const EdgeInsets.all(10),
-            child: Icon(icon, color: Colors.white),
+            child: Icon(icon, color: const Color(0xFF6FE6FF)),
           ),
         ),
       ),
@@ -532,13 +531,14 @@ class _ControlTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black54,
+        color: const Color(0xCC1C2940),
+        border: Border.all(color: const Color(0xFF2A415D)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          color: Colors.white,
+          color: Color(0xFFE1ECFA),
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

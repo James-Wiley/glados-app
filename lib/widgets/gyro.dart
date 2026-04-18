@@ -127,6 +127,7 @@ class _GyroPageState extends State<GyroPage> {
 
   @override
   Widget build(BuildContext context) {
+    final titleStyle = Theme.of(context).textTheme.headlineSmall;
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = Size(constraints.maxWidth, constraints.maxHeight);
@@ -139,33 +140,36 @@ class _GyroPageState extends State<GyroPage> {
           onTapDown: (details) =>
               _updateTouchServos(details.localPosition, size),
           child: Container(
-            color: const Color(0xFFE8F0FE),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF0A1019), Color(0xFF121C29)],
+              ),
+            ),
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Gyro Control',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                Text('NEURO-INERTIAL OVERRIDE', style: titleStyle),
                 const SizedBox(height: 8),
                 Text(
                   _isArmed
-                      ? 'Touch: Servo 3/4 | Accelerometer: Servo 1/2'
-                      : 'Touch anywhere to start control',
+                      ? 'Touch channel : Servo 3/4 | Motion channel : Servo 1/2'
+                      : 'Touch anywhere to arm manual override',
                   style: TextStyle(
-                    color: _isArmed ? Colors.green[700] : Colors.blueGrey[700],
+                    color: _isArmed
+                        ? const Color(0xFF67E4A8)
+                        : const Color(0xFF8CA1BA),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Inputs on this device: '
+                  'Sensor diagnostics: '
                   'Accelerometer ${_hasAccelerometer ? 'available' : 'missing'}',
-                  style: TextStyle(
-                    color: Colors.blueGrey[700],
+                  style: const TextStyle(
+                    color: Color(0xFF8CA1BA),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -174,8 +178,8 @@ class _GyroPageState extends State<GyroPage> {
                   const SizedBox(height: 6),
                   Text(
                     _sensorStatus!,
-                    style: TextStyle(
-                      color: Colors.orange[800],
+                    style: const TextStyle(
+                      color: Color(0xFFE5A93D),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -184,7 +188,6 @@ class _GyroPageState extends State<GyroPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: Card(
-                    color: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -197,10 +200,17 @@ class _GyroPageState extends State<GyroPage> {
                                 Text(
                                   'Servo ${i + 1}',
                                   style: const TextStyle(
+                                    color: Color(0xFFD6E1F0),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                Text('${_servoValues[i].round()}°'),
+                                Text(
+                                  '${_servoValues[i].round()}°',
+                                  style: const TextStyle(
+                                    color: Color(0xFF6FE6FF),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -208,6 +218,8 @@ class _GyroPageState extends State<GyroPage> {
                               value: _servoValues[i] / 180.0,
                               minHeight: 8,
                               borderRadius: BorderRadius.circular(6),
+                              color: const Color(0xFF6FE6FF),
+                              backgroundColor: const Color(0xFF253345),
                             ),
                             const SizedBox(height: 14),
                           ],
