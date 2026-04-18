@@ -20,7 +20,11 @@ class AnimationPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.science_outlined, color: Color(0xFF6FE6FF), size: 42),
+              const Icon(
+                Icons.science_outlined,
+                color: Color(0xFF6FE6FF),
+                size: 42,
+              ),
               const SizedBox(height: 10),
               Text(
                 'TEST CHAMBER SEQUENCER',

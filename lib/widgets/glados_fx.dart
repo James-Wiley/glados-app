@@ -83,10 +83,7 @@ class _LabOverlayPainter extends CustomPainter {
         final n = _hash(x, y, phase);
         if (n > 0.72) {
           canvas.drawCircle(
-            Offset(
-              x + (n * step * 0.7),
-              y + (((1 - n) * step * 0.7)),
-            ),
+            Offset(x + (n * step * 0.7), y + (((1 - n) * step * 0.7))),
             0.9,
             noise,
           );
@@ -110,11 +107,7 @@ class GladosBootText extends StatefulWidget {
   final String text;
   final TextStyle? style;
 
-  const GladosBootText({
-    super.key,
-    required this.text,
-    this.style,
-  });
+  const GladosBootText({super.key, required this.text, this.style});
 
   @override
   State<GladosBootText> createState() => _GladosBootTextState();
@@ -141,7 +134,8 @@ class _GladosBootTextState extends State<GladosBootText>
 
   @override
   Widget build(BuildContext context) {
-    final style = widget.style ??
+    final style =
+        widget.style ??
         const TextStyle(
           color: Color(0xFFC0D0E4),
           letterSpacing: 0.8,
@@ -153,9 +147,9 @@ class _GladosBootTextState extends State<GladosBootText>
       builder: (context, _) {
         final progress = _controller.value;
         final charCount = (widget.text.length * progress).floor().clamp(
-              1,
-              widget.text.length,
-            );
+          1,
+          widget.text.length,
+        );
         final visible = widget.text.substring(0, charCount);
         final flicker = 0.85 + (math.sin(progress * math.pi * 12) * 0.12);
 
@@ -206,7 +200,9 @@ class _PulsingStatusTextState extends State<PulsingStatusText>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final intensity = widget.online ? _controller.value : 1 - _controller.value;
+        final intensity = widget.online
+            ? _controller.value
+            : 1 - _controller.value;
         final color = Color.lerp(
           widget.online ? const Color(0xFF3A6A54) : const Color(0xFF6E4D2A),
           widget.online ? const Color(0xFF67E4A8) : const Color(0xFFE5A93D),
@@ -223,8 +219,9 @@ class _PulsingStatusTextState extends State<PulsingStatusText>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: (color ?? const Color(0xFF67E4A8))
-                        .withValues(alpha: 0.55),
+                    color: (color ?? const Color(0xFF67E4A8)).withValues(
+                      alpha: 0.55,
+                    ),
                     blurRadius: 8,
                   ),
                 ],
