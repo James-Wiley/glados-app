@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../utils/app_colors.dart';
 import '../utils/robot_comm.dart';
 import '../widgets/sliders.dart';
 import '../widgets/gyro.dart';
@@ -108,9 +109,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF0B0F16),
-                  Color(0xFF141B26),
-                  Color(0xFF0E1320),
+                  AppColors.backgroundDarkTop,
+                  Color.lerp(
+                        AppColors.backgroundDarkTop,
+                        AppColors.backgroundDarkBottom,
+                        0.5,
+                      ) ??
+                      AppColors.backgroundDarkBottom,
+                  AppColors.backgroundDarkBottom,
                 ],
               ),
             ),
@@ -128,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Icon(
                             Icons.warning_amber_rounded,
                             size: 56,
-                            color: Color(0xFFE5A93D),
+                            color: AppColors.accentAmber,
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -178,19 +184,19 @@ class _HomeScreenState extends State<HomeScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF0A0F15), Color(0xFF121A25)],
+              colors: [AppColors.surfaceAlt, AppColors.backgroundDarkBottom],
             ),
           ),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(color: Color(0xFF6FE6FF)),
+                const CircularProgressIndicator(color: AppColors.accentCyan),
                 const SizedBox(height: 16),
                 GladosBootText(
                   text: 'Booting GLaDOS Interface...',
                   style: const TextStyle(
-                    color: Color(0xFFC0D0E4),
+                    color: AppColors.textLight,
                     letterSpacing: 0.8,
                     fontWeight: FontWeight.w600,
                   ),
@@ -211,19 +217,23 @@ class _HomeScreenState extends State<HomeScreen> {
               margin: const EdgeInsets.fromLTRB(12, 10, 12, 8),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF131C2A),
+                color: AppColors.panelMedium,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2B3E57)),
+                border: Border.all(color: AppColors.panelBorderAlt),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.memory, color: Color(0xFF6FE6FF), size: 18),
+                  const Icon(
+                    Icons.memory,
+                    color: AppColors.accentCyan,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
                       'GENETIC LIFEFORM & DISK OPERATING SYSTEM',
                       style: TextStyle(
-                        color: Color(0xFFCFDCEE),
+                        color: AppColors.textLightest,
                         letterSpacing: 0.7,
                         fontWeight: FontWeight.w700,
                         fontSize: 11,

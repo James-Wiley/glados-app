@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
+import '../utils/app_colors.dart';
 import '../utils/robot_comm.dart';
 
 class GyroPage extends StatefulWidget {
@@ -144,7 +145,7 @@ class _GyroPageState extends State<GyroPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0A1019), Color(0xFF121C29)],
+                colors: [AppColors.surfaceAlt, AppColors.backgroundDarkBottom],
               ),
             ),
             padding: const EdgeInsets.all(20),
@@ -158,9 +159,7 @@ class _GyroPageState extends State<GyroPage> {
                       ? 'Touch channel : Servo 3/4 | Motion channel : Servo 1/2'
                       : 'Touch anywhere to arm manual override',
                   style: TextStyle(
-                    color: _isArmed
-                        ? const Color(0xFF67E4A8)
-                        : const Color(0xFF8CA1BA),
+                    color: _isArmed ? AppColors.accentGreen : AppColors.textDim,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -169,7 +168,7 @@ class _GyroPageState extends State<GyroPage> {
                   'Sensor diagnostics: '
                   'Accelerometer ${_hasAccelerometer ? 'available' : 'missing'}',
                   style: const TextStyle(
-                    color: Color(0xFF8CA1BA),
+                    color: AppColors.textDim,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -179,7 +178,7 @@ class _GyroPageState extends State<GyroPage> {
                   Text(
                     _sensorStatus!,
                     style: const TextStyle(
-                      color: Color(0xFFE5A93D),
+                      color: AppColors.accentAmber,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -200,14 +199,14 @@ class _GyroPageState extends State<GyroPage> {
                                 Text(
                                   'Servo ${i + 1}',
                                   style: const TextStyle(
-                                    color: Color(0xFFD6E1F0),
+                                    color: AppColors.textLighter,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 Text(
                                   '${_servoValues[i].round()}°',
                                   style: const TextStyle(
-                                    color: Color(0xFF6FE6FF),
+                                    color: AppColors.accentCyan,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -218,8 +217,8 @@ class _GyroPageState extends State<GyroPage> {
                               value: _servoValues[i] / 180.0,
                               minHeight: 8,
                               borderRadius: BorderRadius.circular(6),
-                              color: const Color(0xFF6FE6FF),
-                              backgroundColor: const Color(0xFF253345),
+                              color: AppColors.accentCyan,
+                              backgroundColor: AppColors.panelMedium,
                             ),
                             const SizedBox(height: 14),
                           ],

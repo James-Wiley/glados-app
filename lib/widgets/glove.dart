@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:hand_detection/hand_detection.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 
+import '../utils/app_colors.dart';
 import '../utils/robot_comm.dart';
 
 class GlovePage extends StatefulWidget {
@@ -480,7 +481,10 @@ class _GlovePageState extends State<GlovePage> {
                           'Middle actuator ${(100 * _curls['middle']!).toStringAsFixed(0)}%  |  '
                           'Ring actuator ${(100 * _curls['ring']!).toStringAsFixed(0)}%  |  '
                           'Pinky actuator ${(100 * _curls['pinky']!).toStringAsFixed(0)}%',
-                style: const TextStyle(color: Color(0xFFD5E3F5), fontSize: 12),
+                style: const TextStyle(
+                  color: AppColors.textLightest,
+                  fontSize: 12,
+                ),
               ),
             ),
           ),
@@ -504,7 +508,7 @@ class _ViewControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xCC172130),
+      color: AppColors.panelDark.withOpacity(0.8),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -513,7 +517,7 @@ class _ViewControlButton extends StatelessWidget {
           message: tooltip,
           child: Padding(
             padding: const EdgeInsets.all(10),
-            child: Icon(icon, color: const Color(0xFF6FE6FF)),
+            child: Icon(icon, color: AppColors.accentCyan),
           ),
         ),
       ),
@@ -531,14 +535,14 @@ class _ControlTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xCC1C2940),
-        border: Border.all(color: const Color(0xFF2A415D)),
+        color: AppColors.panelMedium.withOpacity(0.8),
+        border: Border.all(color: AppColors.panelBorderAlt),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          color: Color(0xFFE1ECFA),
+          color: AppColors.textLightest,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'utils/app_colors.dart';
 import 'widgets/glados_fx.dart';
 import 'screens/home_screen.dart';
 
@@ -11,17 +12,12 @@ class RobotApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const labBg = Color(0xFF0B0F16);
-    const panel = Color(0xFF121923);
-    const cyan = Color(0xFF6FE6FF);
-    const amber = Color(0xFFE5A93D);
-
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: cyan,
+      seedColor: AppColors.accentCyan,
       brightness: Brightness.dark,
-      primary: cyan,
-      secondary: amber,
-      surface: panel,
+      primary: AppColors.accentCyan,
+      secondary: AppColors.accentAmber,
+      surface: AppColors.panelDark,
     );
 
     return MaterialApp(
@@ -37,60 +33,60 @@ class RobotApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: colorScheme,
-        scaffoldBackgroundColor: labBg,
-        cardTheme: const CardThemeData(
-          color: panel,
+        scaffoldBackgroundColor: AppColors.backgroundDarkTop,
+        cardTheme: CardThemeData(
+          color: AppColors.panelDark,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(14)),
-            side: BorderSide(color: Color(0xFF2A3646)),
+            borderRadius: const BorderRadius.all(Radius.circular(14)),
+            side: BorderSide(color: AppColors.panelBorderAlt),
           ),
         ),
         textTheme: const TextTheme(
           headlineSmall: TextStyle(
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
-            color: Color(0xFFE7EDF6),
+            color: AppColors.textPrimary,
             fontFamily: 'monospace',
           ),
           titleMedium: TextStyle(
             fontWeight: FontWeight.w600,
             letterSpacing: 0.7,
-            color: Color(0xFFD9E2F0),
+            color: AppColors.textSecondary,
             fontFamily: 'monospace',
           ),
           bodyMedium: TextStyle(
-            color: Color(0xFFB2C0D2),
+            color: AppColors.textTertiary,
             letterSpacing: 0.2,
             fontFamily: 'monospace',
           ),
         ),
         appBarTheme: AppBarTheme(
-          backgroundColor: labBg,
+          backgroundColor: AppColors.backgroundDarkTop,
           foregroundColor: colorScheme.primary,
           elevation: 0,
         ),
         sliderTheme: SliderThemeData(
           activeTrackColor: colorScheme.primary,
-          inactiveTrackColor: const Color(0xFF233041),
+          inactiveTrackColor: AppColors.sliderTrackInactive,
           thumbColor: colorScheme.secondary,
           overlayColor: colorScheme.secondary.withValues(alpha: 0.15),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1C2A3A),
-            foregroundColor: const Color(0xFFEAF3FF),
+            backgroundColor: AppColors.buttonBackground,
+            foregroundColor: AppColors.textLighter,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Color(0xFF2E445D)),
+              side: BorderSide(color: AppColors.buttonBorder),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFC9D8EA),
-            side: const BorderSide(color: Color(0xFF33475E)),
+            foregroundColor: AppColors.textSecondary,
+            side: BorderSide(color: AppColors.buttonBorder),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -98,9 +94,9 @@ class RobotApp extends StatelessWidget {
           ),
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: const Color(0xFF121923),
+          backgroundColor: AppColors.panelDark,
           selectedItemColor: colorScheme.primary,
-          unselectedItemColor: const Color(0xFF7C8FA7),
+          unselectedItemColor: AppColors.textDim,
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,

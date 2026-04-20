@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../utils/app_colors.dart';
+
 class GladosVisualOverlay extends StatefulWidget {
   const GladosVisualOverlay({super.key});
 
@@ -55,7 +57,7 @@ class _LabOverlayPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final scan = Paint()
-      ..color = const Color(0xFF6FE6FF).withValues(alpha: 0.08)
+      ..color = AppColors.accentCyan.withValues(alpha: 0.08)
       ..strokeWidth = 1;
 
     final jitter = (phase * 6).floor() % 6;
@@ -68,14 +70,18 @@ class _LabOverlayPainter extends CustomPainter {
       ..shader = LinearGradient(
         colors: [
           const Color(0x00000000),
-          const Color(0x886FE6FF),
+          Color.lerp(
+            Colors.transparent,
+            AppColors.accentCyan,
+            0.5,
+          )!.withAlpha(136),
           const Color(0x00000000),
         ],
       ).createShader(Rect.fromLTWH(0, sweepY - 12, size.width, 24));
     canvas.drawRect(Rect.fromLTWH(0, sweepY - 12, size.width, 24), sweep);
 
     final noise = Paint()
-      ..color = const Color(0xFFE7EDF6).withValues(alpha: 0.05)
+      ..color = AppColors.textPrimary.withValues(alpha: 0.05)
       ..strokeWidth = 1;
     const step = 22.0;
     for (double y = 0; y < size.height; y += step) {
@@ -137,7 +143,7 @@ class _GladosBootTextState extends State<GladosBootText>
     final style =
         widget.style ??
         const TextStyle(
-          color: Color(0xFFC0D0E4),
+          color: AppColors.textLight,
           letterSpacing: 0.8,
           fontWeight: FontWeight.w600,
         );
@@ -205,7 +211,7 @@ class _PulsingStatusTextState extends State<PulsingStatusText>
             : 1 - _controller.value;
         final color = Color.lerp(
           widget.online ? const Color(0xFF3A6A54) : const Color(0xFF6E4D2A),
-          widget.online ? const Color(0xFF67E4A8) : const Color(0xFFE5A93D),
+          widget.online ? AppColors.accentGreen : AppColors.accentAmber,
           intensity,
         );
         return Row(
@@ -219,7 +225,7 @@ class _PulsingStatusTextState extends State<PulsingStatusText>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: (color ?? const Color(0xFF67E4A8)).withValues(
+                    color: (color ?? AppColors.accentGreen).withValues(
                       alpha: 0.55,
                     ),
                     blurRadius: 8,

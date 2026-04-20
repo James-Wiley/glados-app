@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../utils/app_colors.dart';
 import '../utils/robot_comm.dart';
 
 class SlidersPage extends StatefulWidget {
@@ -40,7 +41,16 @@ class _SlidersPageState extends State<SlidersPage> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0B1018), Color(0xFF101927), Color(0xFF0E1521)],
+          colors: [
+            AppColors.backgroundDarkTop,
+            Color.lerp(
+                  AppColors.backgroundDarkTop,
+                  AppColors.backgroundDarkBottom,
+                  0.5,
+                ) ??
+                AppColors.backgroundDarkBottom,
+            AppColors.backgroundDarkBottom,
+          ],
         ),
       ),
       child: ListView(
@@ -50,7 +60,7 @@ class _SlidersPageState extends State<SlidersPage> {
           const SizedBox(height: 6),
           const Text(
             'Direct motor control for chassis articulation and test posture.',
-            style: TextStyle(color: Color(0xFF8FA1B7)),
+            style: TextStyle(color: AppColors.textDim),
           ),
           const SizedBox(height: 16),
           for (int i = 0; i < 4; i++) ...[
@@ -69,7 +79,7 @@ class _SlidersPageState extends State<SlidersPage> {
                         Text(
                           'Servo ${i + 1}',
                           style: const TextStyle(
-                            color: Color(0xFFD6E1F0),
+                            color: AppColors.textLighter,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.5,
                           ),
@@ -80,14 +90,14 @@ class _SlidersPageState extends State<SlidersPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A2738),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFF2A415D)),
+                            color: AppColors.panelMedium,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.panelBorderAlt),
                           ),
                           child: Text(
                             '${_servoValues[i].round()}°',
                             style: const TextStyle(
-                              color: Color(0xFF6FE6FF),
+                              color: AppColors.accentCyan,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
