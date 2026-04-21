@@ -36,12 +36,12 @@ class _GlovePageState extends State<GlovePage> {
   int _frameCounter = 0;
   int _lastServoSentMs = 0;
   static const int _frameSkip = 2; // process every 2nd frame
-  
+
   // Hand overlay scaling and positioning (manually calibrated values)
-  double _handScaleX = 1.52;  // Width scale (manually found)
-  double _handScaleY = 0.56;  // Height scale (manually found)
-  double _handOffsetX = 185.0;  // Horizontal offset (manually found)
-  double _handOffsetY = -127.0;  // Vertical offset (manually found)
+  double _handScaleX = 1.52; // Width scale (manually found)
+  double _handScaleY = 0.56; // Height scale (manually found)
+  double _handOffsetX = 185.0; // Horizontal offset (manually found)
+  double _handOffsetY = -127.0; // Vertical offset (manually found)
 
   @override
   void initState() {
@@ -402,7 +402,6 @@ class _GlovePageState extends State<GlovePage> {
                         fontSize: 12,
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -461,7 +460,11 @@ class _OneHandPainter extends CustomPainter {
 
     for (final l in hand.landmarks) {
       if (l.visibility < 0.5) continue;
-      canvas.drawCircle(Offset(l.x * scaleX + offsetX, l.y * scaleY + offsetY), 4, dot);
+      canvas.drawCircle(
+        Offset(l.x * scaleX + offsetX, l.y * scaleY + offsetY),
+        4,
+        dot,
+      );
     }
   }
 
