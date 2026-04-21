@@ -208,8 +208,7 @@ class RobotArmService {
         return RobotResult.failure(
           'Robot arm not found nearby. '
           'Expected service: ${RobotUuids.service}. '
-          'If this is Android, verify Location is turned ON in system settings. '
-          'Observed scan results:\n$_lastScanDebugSummary',
+          'If this is Android, verify Location is turned ON in system settings.',
         );
       }
 

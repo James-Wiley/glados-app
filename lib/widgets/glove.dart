@@ -36,6 +36,12 @@ class _GlovePageState extends State<GlovePage> {
   int _frameCounter = 0;
   int _lastServoSentMs = 0;
   static const int _frameSkip = 2; // process every 2nd frame
+  
+  // Hand overlay scaling and positioning (manually calibrated values)
+  double _handScaleX = 1.52;  // Width scale (manually found)
+  double _handScaleY = 0.56;  // Height scale (manually found)
+  double _handOffsetX = 185.0;  // Horizontal offset (manually found)
+  double _handOffsetY = -127.0;  // Vertical offset (manually found)
 
   @override
   void initState() {
@@ -65,8 +71,12 @@ class _GlovePageState extends State<GlovePage> {
         orElse: () => cams.first,
       );
 
-      _quarterTurns = ((cam.sensorOrientation / 90).round() + 3) % 4;
-      _mirrorPreview = cam.lensDirection == CameraLensDirection.front;
+      _quarterTurns = ((cam.sensorOrientation / 90).round() + 1) % 4;
+      _mirrorPreview = cam.lensDirection != CameraLensDirection.front;
+
+      // Apply same transformations to hand overlay, but mirror and rotate 90° left
+      _handQuarterTurns = (_quarterTurns + 3) % 4; // 90° left rotation
+      _mirrorHand = !_mirrorPreview; // Mirror the hand
 
       _cameraController = CameraController(
         cam,
@@ -288,46 +298,6 @@ class _GlovePageState extends State<GlovePage> {
     await _robot.setServoAngles(angles);
   }
 
-  void _rotateLeft() {
-    setState(() => _quarterTurns = (_quarterTurns + 3) % 4);
-  }
-
-  void _rotateRight() {
-    setState(() => _quarterTurns = (_quarterTurns + 1) % 4);
-  }
-
-  void _toggleMirror() {
-    setState(() => _mirrorPreview = !_mirrorPreview);
-  }
-
-  void _resetView() {
-    final cam = _cameraController?.description;
-    if (cam == null) return;
-    setState(() {
-      _quarterTurns = ((cam.sensorOrientation / 90).round() + 3) % 4;
-      _mirrorPreview = cam.lensDirection == CameraLensDirection.front;
-    });
-  }
-
-  void _rotateHandLeft() {
-    setState(() => _handQuarterTurns = (_handQuarterTurns + 3) % 4);
-  }
-
-  void _rotateHandRight() {
-    setState(() => _handQuarterTurns = (_handQuarterTurns + 1) % 4);
-  }
-
-  void _toggleHandMirror() {
-    setState(() => _mirrorHand = !_mirrorHand);
-  }
-
-  void _resetHandView() {
-    setState(() {
-      _handQuarterTurns = 0;
-      _mirrorHand = false;
-    });
-  }
-
   @override
   void dispose() {
     try {
@@ -380,6 +350,10 @@ class _GlovePageState extends State<GlovePage> {
                                 painter: _OneHandPainter(
                                   hand: _hand!,
                                   imageSize: _imageSize!,
+                                  scaleXFactor: _handScaleY,
+                                  scaleYFactor: _handScaleX,
+                                  offsetX: _handOffsetX,
+                                  offsetY: _handOffsetY,
                                 ),
                               ),
                             ),
@@ -400,69 +374,7 @@ class _GlovePageState extends State<GlovePage> {
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const _ControlTag(label: 'Optics'),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.rotate_left,
-                      tooltip: 'Rotate camera left',
-                      onPressed: _rotateLeft,
-                    ),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.rotate_right,
-                      tooltip: 'Rotate camera right',
-                      onPressed: _rotateRight,
-                    ),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.flip,
-                      tooltip: 'Mirror camera',
-                      onPressed: _toggleMirror,
-                    ),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.restart_alt,
-                      tooltip: 'Reset camera',
-                      onPressed: _resetView,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const _ControlTag(label: 'Manipulator'),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.rotate_left,
-                      tooltip: 'Rotate hand left',
-                      onPressed: _rotateHandLeft,
-                    ),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.rotate_right,
-                      tooltip: 'Rotate hand right',
-                      onPressed: _rotateHandRight,
-                    ),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.flip,
-                      tooltip: 'Mirror hand',
-                      onPressed: _toggleHandMirror,
-                    ),
-                    const SizedBox(width: 8),
-                    _ViewControlButton(
-                      icon: Icons.restart_alt,
-                      tooltip: 'Reset hand',
-                      onPressed: _resetHandView,
-                    ),
-                  ],
-                ),
-              ],
+              children: const [],
             ),
           ),
         ),
@@ -473,17 +385,25 @@ class _GlovePageState extends State<GlovePage> {
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Text(
-                _curls.isEmpty
-                    ? 'No test subject tracked'
-                    : 'Thumb actuator ${(100 * _curls['thumb']!).toStringAsFixed(0)}%  |  '
-                          'Index actuator ${(100 * _curls['index']!).toStringAsFixed(0)}%  |  '
-                          'Middle actuator ${(100 * _curls['middle']!).toStringAsFixed(0)}%  |  '
-                          'Ring actuator ${(100 * _curls['ring']!).toStringAsFixed(0)}%  |  '
-                          'Pinky actuator ${(100 * _curls['pinky']!).toStringAsFixed(0)}%',
-                style: const TextStyle(
-                  color: AppColors.textLightest,
-                  fontSize: 12,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      _curls.isEmpty
+                          ? 'No test subject tracked'
+                          : 'Thumb: ${(100 * _curls['thumb']!).toStringAsFixed(0)}%  |  '
+                                'Index: ${(100 * _curls['index']!).toStringAsFixed(0)}%  |  '
+                                'Middle: ${(100 * _curls['middle']!).toStringAsFixed(0)}%  |  '
+                                'Ring: ${(100 * _curls['ring']!).toStringAsFixed(0)}%  |  '
+                                'Pinky: ${(100 * _curls['pinky']!).toStringAsFixed(0)}%',
+                      style: const TextStyle(
+                        color: AppColors.textLightest,
+                        fontSize: 12,
+                      ),
+                    ),
+
+                  ],
                 ),
               ),
             ),
@@ -494,73 +414,31 @@ class _GlovePageState extends State<GlovePage> {
   }
 }
 
-class _ViewControlButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  const _ViewControlButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.panelDark.withOpacity(0.8),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onPressed,
-        child: Tooltip(
-          message: tooltip,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Icon(icon, color: AppColors.accentCyan),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ControlTag extends StatelessWidget {
-  final String label;
-
-  const _ControlTag({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.panelMedium.withOpacity(0.8),
-        border: Border.all(color: AppColors.panelBorderAlt),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: AppColors.textLightest,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
 class _OneHandPainter extends CustomPainter {
   final Hand hand;
   final Size imageSize;
+  final double scaleXFactor;
+  final double scaleYFactor;
+  final double offsetX;
+  final double offsetY;
 
-  _OneHandPainter({required this.hand, required this.imageSize});
+  _OneHandPainter({
+    required this.hand,
+    required this.imageSize,
+    this.scaleXFactor = 1.0,
+    this.scaleYFactor = 1.0,
+    this.offsetX = 0.0,
+    this.offsetY = 0.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final sx = size.width / imageSize.width;
     final sy = size.height / imageSize.height;
+
+    // Adjust hand dimensions using state factors
+    final scaleX = sx * scaleXFactor;
+    final scaleY = sy * scaleYFactor;
 
     final line = Paint()
       ..color = Colors.greenAccent
@@ -575,15 +453,15 @@ class _OneHandPainter extends CustomPainter {
       if (a == null || b == null) continue;
       if (a.visibility < 0.5 || b.visibility < 0.5) continue;
       canvas.drawLine(
-        Offset(a.x * sx, a.y * sy),
-        Offset(b.x * sx, b.y * sy),
+        Offset(a.x * scaleX + offsetX, a.y * scaleY + offsetY),
+        Offset(b.x * scaleX + offsetX, b.y * scaleY + offsetY),
         line,
       );
     }
 
     for (final l in hand.landmarks) {
       if (l.visibility < 0.5) continue;
-      canvas.drawCircle(Offset(l.x * sx, l.y * sy), 4, dot);
+      canvas.drawCircle(Offset(l.x * scaleX + offsetX, l.y * scaleY + offsetY), 4, dot);
     }
   }
 
