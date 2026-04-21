@@ -305,10 +305,12 @@ class RobotArmService {
 
     // In bypass mode, succeed silently
     if (_bypassMode) {
+      print('[RobotArm] BYPASS MODE: Would send angles=$angles, speeds=$speeds');
       return const RobotResult.success(null);
     }
 
     if (!isConnected || _servoChar == null) {
+      print('[RobotArm] NOT CONNECTED: angles=$angles');
       return const RobotResult.failure('Not connected');
     }
 
@@ -317,14 +319,17 @@ class RobotArmService {
     final clampedSpeeds = speeds.map((s) => s.clamp(0.0, 1.0)).toList();
 
     final payload = jsonEncode({'angles': clamped, 'speeds': clampedSpeeds});
+    print('[RobotArm] Sending servo command: $payload');
 
     try {
       await _servoChar!.write(
         utf8.encode(payload),
         withoutResponse: _servoChar!.properties.writeWithoutResponse,
       );
+      print('[RobotArm] Servo command sent successfully');
       return const RobotResult.success(null);
     } catch (e) {
+      print('[RobotArm] Servo write failed: $e');
       return RobotResult.failure('Servo write failed: $e');
     }
   }

@@ -164,6 +164,49 @@ class _AnimationEditorDialogState extends State<AnimationEditorDialog> {
     )?.showSnackBar(SnackBar(content: Text(message)));
   }
 
+  List<double> _getInterpolatedAnglesAtTime(int timeMs) {
+    // If no waypoints, default to 90 degrees
+    if (_waypoints.isEmpty) {
+      return List<double>.filled(4, 90.0);
+    }
+
+    // Sort waypoints by time to find surrounding ones
+    final sorted = List<WaypointDraft>.from(_waypoints)
+      ..sort((a, b) => a.timeMs.compareTo(b.timeMs));
+
+    // If requested time is before first waypoint, use first waypoint's angles
+    if (timeMs <= sorted.first.timeMs) {
+      return List<double>.from(sorted.first.angles);
+    }
+
+    // If requested time is after last waypoint, use last waypoint's angles
+    if (timeMs >= sorted.last.timeMs) {
+      return List<double>.from(sorted.last.angles);
+    }
+
+    // Find the two waypoints that bracket this time
+    for (var i = 0; i < sorted.length - 1; i++) {
+      final start = sorted[i];
+      final end = sorted[i + 1];
+
+      if (timeMs >= start.timeMs && timeMs <= end.timeMs) {
+        // Linear interpolation between start and end
+        final durationMs = end.timeMs - start.timeMs;
+        final t = (timeMs - start.timeMs) / durationMs;
+
+        return List<double>.generate(
+          4,
+          (servoIndex) =>
+              start.angles[servoIndex] +
+              ((end.angles[servoIndex] - start.angles[servoIndex]) * t),
+        );
+      }
+    }
+
+    // Fallback to 90 degrees
+    return List<double>.filled(4, 90.0);
+  }
+
   Future<void> _sendServoValues() async {
     setState(() {
       _isSendingServo = true;
@@ -305,17 +348,18 @@ class _AnimationEditorDialogState extends State<AnimationEditorDialog> {
                     _timeController.text = timeMs.toString();
                   },
                   onAddWaypoint: (timeMs) {
+                    final interpolatedAngles = _getInterpolatedAnglesAtTime(timeMs);
                     final draft = WaypointDraft(
                       id: DateTime.now().microsecondsSinceEpoch.toString(),
                       timeMs: timeMs,
-                      angles: List<double>.filled(4, 90.0),
+                      angles: interpolatedAngles,
                     );
                     setState(() {
                       _waypoints.add(draft);
                       _waypoints.sort((a, b) => a.timeMs.compareTo(b.timeMs));
                     });
                     _showMessage(
-                      'Waypoint added at ${timeMs}ms with default servo angles.',
+                      'Waypoint added at ${timeMs}ms with interpolated servo angles: ${interpolatedAngles.map((a) => a.toStringAsFixed(1)).join(", ")}°.',
                     );
                   },
                   onPositionChanged: (timeMs) {

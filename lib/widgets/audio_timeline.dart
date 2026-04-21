@@ -205,12 +205,9 @@ class _AudioTimelineState extends State<AudioTimeline> {
               final renderBox = context.findRenderObject() as RenderBox?;
               if (renderBox == null) return;
 
-              final timelineWidth =
-                  renderBox.size.width - 32; // Account for padding
-              final tapPosition =
-                  details.globalPosition.dx -
-                  renderBox.globalToLocal(Offset.zero).dx -
-                  16;
+              final timelineWidth = renderBox.size.width - 32; // Account for padding
+              final localPosition = renderBox.globalToLocal(details.globalPosition);
+              final tapPosition = localPosition.dx - 16;
 
               _seekToPosition(tapPosition, timelineWidth);
             },
@@ -219,10 +216,8 @@ class _AudioTimelineState extends State<AudioTimeline> {
               if (renderBox == null) return;
 
               final timelineWidth = renderBox.size.width - 32;
-              final tapPosition =
-                  details.globalPosition.dx -
-                  renderBox.globalToLocal(Offset.zero).dx -
-                  16;
+              final localPosition = renderBox.globalToLocal(details.globalPosition);
+              final tapPosition = localPosition.dx - 16;
 
               _seekToPosition(tapPosition, timelineWidth);
             },

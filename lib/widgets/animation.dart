@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -29,6 +29,7 @@ class _AnimationPageState extends State<AnimationPage> {
   String _statusText = 'Loading saved animations...';
   int _playbackToken = 0;
   List<double> _currentPlayingAngles = [90, 90, 90, 90];
+  int _currentWaypointIndex = 0;
 
   @override
   void initState() {
@@ -263,6 +264,7 @@ class _AnimationPageState extends State<AnimationPage> {
       _isPlaying = false;
       _activeAnimationId = null;
       _currentPlayingAngles = [90, 90, 90, 90];
+      _currentWaypointIndex = 0;
       if (!silent) {
         _statusText = 'Playback stopped.';
       }
@@ -274,75 +276,149 @@ class _AnimationPageState extends State<AnimationPage> {
     int playbackToken,
   ) async {
     final waypoints = animation.sortedWaypoints;
+    print('[Animation] Starting playback of "${animation.name}" with ${waypoints.length} waypoints');
     if (waypoints.isEmpty) {
+      print('[Animation] No waypoints found, skipping animation');
       return;
     }
 
-    final audioPath = animation.audioPath;
-    if (audioPath != null && audioPath.isNotEmpty) {
-      final audioFile = File(audioPath);
-      if (await audioFile.exists()) {
-        try {
-          await _audioPlayer.stop();
-          await _audioPlayer.setFilePath(audioPath);
-          await _audioPlayer.play();
-        } catch (error) {
-          if (mounted && playbackToken == _playbackToken) {
-            setState(() {
-              _statusText =
-                  'Audio track could not be loaded. Servo playback continues.';
-            });
-          }
-        }
-      }
+    final animationDurationMs = animation.durationMs;
+    final animationStartTime = DateTime.now();
+    
+    // Start audio in parallel
+    unawaited(_startAudioPlayback(animation.audioPath));
+
+    // Apply first waypoint immediately
+    await _applyServoAngles(waypoints.first.angles);
+    if (_isPlaybackTokenActive(playbackToken)) {
+      setState(() {
+        _currentPlayingAngles = waypoints.first.angles;
+        _currentWaypointIndex = 1;
+      });
     }
 
-    await _applyServoAngles(waypoints.first.angles);
-    setState(() {
-      _currentPlayingAngles = waypoints.first.angles;
-    });
-    for (var index = 0; index < waypoints.length - 1; index++) {
-      if (!_isPlaybackTokenActive(playbackToken)) {
-        return;
-      }
+    print('[Animation] Starting time-based interpolation (duration: ${animationDurationMs}ms)');
 
-      final start = waypoints[index];
-      final end = waypoints[index + 1];
-      final durationMs = max(1, end.timeMs - start.timeMs);
-      final frameCount = max(1, (durationMs / 50).ceil());
-      final frameDelay = Duration(
-        milliseconds: max(1, (durationMs / frameCount).round()),
-      );
+    var lastUpdateMs = 0;
+    final animationLoop = () async {
+      while (_isPlaybackTokenActive(playbackToken)) {
+        final elapsedMs = DateTime.now().difference(animationStartTime).inMilliseconds;
+        
+        // Only update every ~16ms
+        if ((elapsedMs - lastUpdateMs).abs() < 16) {
+          await Future.delayed(const Duration(milliseconds: 5));
+          continue;
+        }
+        lastUpdateMs = elapsedMs;
 
-      for (var step = 1; step <= frameCount; step++) {
-        if (!_isPlaybackTokenActive(playbackToken)) {
-          return;
+        // Animation is complete
+        if (elapsedMs >= animationDurationMs) {
+          print('[Animation] Reached end of animation at ${elapsedMs}ms (duration: ${animationDurationMs}ms)');
+          break;
         }
 
-        final t = step / frameCount;
+        // Find which waypoint segment we're in
+        var currentSegmentIndex = 0;
+        for (var i = 0; i < waypoints.length - 1; i++) {
+          if (waypoints[i].timeMs <= elapsedMs) {
+            currentSegmentIndex = i;
+          } else {
+            break;
+          }
+        }
+
+        final start = waypoints[currentSegmentIndex];
+        final end = waypoints[currentSegmentIndex + 1];
+        final segmentDurationMs = end.timeMs - start.timeMs;
+        final elapsedInSegmentMs = elapsedMs - start.timeMs;
+
+        // Calculate interpolation progress (0.0 to 1.0)
+        final t = segmentDurationMs > 0
+            ? (elapsedInSegmentMs / segmentDurationMs).clamp(0.0, 1.0)
+            : 0.0;
+
+        // Interpolate servo angles
         final interpolatedAngles = List<double>.generate(
           4,
-          (servoIndex) =>
-              _lerp(start.angles[servoIndex], end.angles[servoIndex], t),
+          (servoIndex) => _lerp(
+            start.angles[servoIndex],
+            end.angles[servoIndex],
+            t,
+          ),
         );
 
-        setState(() {
-          _currentPlayingAngles = interpolatedAngles;
-        });
+        // Send servo command
         await _applyServoAngles(interpolatedAngles);
-        if (step < frameCount) {
-          await Future.delayed(frameDelay);
+
+        // Update UI
+        if (_isPlaybackTokenActive(playbackToken)) {
+          setState(() {
+            _currentPlayingAngles = interpolatedAngles;
+            _currentWaypointIndex = currentSegmentIndex + 1;
+          });
         }
       }
+    };
+
+    // Run animation loop
+    await animationLoop();
+    print('[Animation] Animation loop complete');
+
+    // Wait for audio to finish (or timeout)
+    try {
+      await _audioPlayer.playerStateStream
+          .firstWhere(
+            (state) =>
+                state.processingState == ProcessingState.completed ||
+                state.processingState == ProcessingState.idle,
+          )
+          .timeout(const Duration(seconds: 120));
+    } catch (e) {
+      print('[Animation] Audio playback ended or timed out');
+    }
+  }
+
+  Future<void> _startAudioPlayback(String? audioPath) async {
+    if (audioPath == null || audioPath.isEmpty) {
+      print('[Animation] No audio path provided');
+      return;
+    }
+
+    final audioFile = File(audioPath);
+    if (!await audioFile.exists()) {
+      print('[Animation] Audio file does not exist: $audioPath');
+      return;
+    }
+
+    try {
+      print('[Animation] Starting audio initialization for: $audioPath');
+      await _audioPlayer.stop();
+      print('[Animation] Audio player stopped');
+      
+      await _audioPlayer.setFilePath(audioPath);
+      print('[Animation] Audio file path set');
+      
+      await _audioPlayer.play();
+      print('[Animation] Audio playback started');
+    } catch (error) {
+      print('[Animation] Audio initialization error: $error');
     }
   }
 
   bool _isPlaybackTokenActive(int playbackToken) {
-    return mounted && playbackToken == _playbackToken;
+    final active = mounted && playbackToken == _playbackToken;
+    if (!active) {
+      print('[Animation _isPlaybackTokenActive] mounted=$mounted, playbackToken=$playbackToken, _playbackToken=$_playbackToken');
+    }
+    return active;
   }
 
   Future<void> _applyServoAngles(List<double> angles) async {
-    final result = await _robot.setServoAngles(angles);
+    // Use higher speeds for smooth animation (1.0 = 100% speed)
+    final result = await _robot.setServoAngles(
+      angles,
+      speeds: const [1.0, 1.0, 1.0, 1.0],
+    );
     if (!result.ok) {
       throw StateError(result.error ?? 'Servo command failed');
     }
@@ -678,6 +754,12 @@ class _AnimationPageState extends State<AnimationPage> {
                       : (isActive
                             ? _formatAngles(_currentPlayingAngles)
                             : _formatAngles(animation.waypoints.first.angles)),
+                ),
+                _InfoChip(
+                  label: 'Waypoint',
+                  value: isActive
+                      ? '$_currentWaypointIndex / ${animation.waypoints.length}'
+                      : '—',
                 ),
                 _InfoChip(
                   label: 'Audio',
