@@ -174,20 +174,25 @@ class _AudioTimelineState extends State<AudioTimeline> {
           ),
           const SizedBox(height: 14),
           // Playback controls
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FilledButton.icon(
-                onPressed: _togglePlayPause,
-                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                label: Text(_isPlaying ? 'Pause' : 'Play'),
+              Row(
+                children: [
+                  FilledButton.icon(
+                    onPressed: _togglePlayPause,
+                    icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                    label: Text(_isPlaying ? 'Pause' : 'Play'),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton.icon(
+                    onPressed: _addWaypointAtCurrentTime,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Waypoint'),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              FilledButton.icon(
-                onPressed: _addWaypointAtCurrentTime,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Waypoint'),
-              ),
-              const SizedBox(width: 12),
+              const SizedBox(height: 8),
               Text(
                 '${_formatDuration(_currentPosition)} / ${_formatDuration(_duration)}',
                 style: const TextStyle(
@@ -228,127 +233,113 @@ class _AudioTimelineState extends State<AudioTimeline> {
             },
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: Column(
-                children: [
-                  // Main timeline
-                  SizedBox(
-                    height: 80,
-                    child: CustomPaint(
-                      painter: TimelinePainter(
-                        currentPosition: _currentPosition.inMilliseconds,
-                        duration: _duration.inMilliseconds,
-                        waypoints: widget.waypoints,
-                      ),
-                      size: Size.infinite,
-                    ),
+              child: SizedBox(
+                height: 80,
+                child: CustomPaint(
+                  painter: TimelinePainter(
+                    currentPosition: _currentPosition.inMilliseconds,
+                    duration: _duration.inMilliseconds,
+                    waypoints: widget.waypoints,
                   ),
-                  const SizedBox(height: 12),
-                  // Waypoint list
-                  if (widget.waypoints.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceAlt,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Waypoints (${widget.waypoints.length})',
-                            style: const TextStyle(
-                              color: AppColors.accentCyan,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: List.generate(
-                                widget.waypoints.length,
-                                (index) => Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _audioPlayer.seek(
-                                        Duration(
-                                          milliseconds:
-                                              widget.waypoints[index].timeMs,
-                                        ),
-                                      );
-                                      widget.onWaypointTap(
-                                        widget.waypoints[index],
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF6FE6FF,
-                                        ).withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color:
-                                              _currentPosition.inMilliseconds >=
-                                                      widget
-                                                              .waypoints[index]
-                                                              .timeMs -
-                                                          100 &&
-                                                  _currentPosition
-                                                          .inMilliseconds <=
-                                                      widget
-                                                              .waypoints[index]
-                                                              .timeMs +
-                                                          100
-                                              ? AppColors.accentCyan
-                                              : Colors.transparent,
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            '${index + 1}',
-                                            style: const TextStyle(
-                                              color: AppColors.accentCyan,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                          Text(
-                                            _formatDuration(
-                                              Duration(
-                                                milliseconds: widget
-                                                    .waypoints[index]
-                                                    .timeMs,
-                                              ),
-                                            ),
-                                            style: const TextStyle(
-                                              color: AppColors.textSubtleAlt,
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
+                  size: Size.infinite,
+                ),
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          // Waypoint list
+          if (widget.waypoints.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Waypoints (${widget.waypoints.length})',
+                    style: const TextStyle(
+                      color: AppColors.accentCyan,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(
+                        widget.waypoints.length,
+                        (index) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () {
+                              _audioPlayer.seek(
+                                Duration(
+                                  milliseconds: widget.waypoints[index].timeMs,
+                                ),
+                              );
+                              widget.onWaypointTap(widget.waypoints[index]);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFF6FE6FF,
+                                ).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color:
+                                      _currentPosition.inMilliseconds >=
+                                              widget.waypoints[index].timeMs -
+                                                  100 &&
+                                          _currentPosition.inMilliseconds <=
+                                              widget.waypoints[index].timeMs +
+                                                  100
+                                      ? AppColors.accentCyan
+                                      : Colors.transparent,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${index + 1}',
+                                    style: const TextStyle(
+                                      color: AppColors.accentCyan,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatDuration(
+                                      Duration(
+                                        milliseconds:
+                                            widget.waypoints[index].timeMs,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      color: AppColors.textSubtleAlt,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

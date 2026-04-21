@@ -305,31 +305,34 @@ class _AnimationEditorDialogState extends State<AnimationEditorDialog> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            _audioPath == null
-                                ? 'No audio track selected'
-                                : 'Audio track: ${_displayNameForPath(_audioPath!)}',
-                            style: const TextStyle(
-                              color: AppColors.textSubtleAlt,
-                            ),
+                        Text(
+                          _audioPath == null
+                              ? 'No audio track selected'
+                              : 'Audio track: ${_displayNameForPath(_audioPath!)}',
+                          style: const TextStyle(
+                            color: AppColors.textSubtleAlt,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        TextButton.icon(
-                          onPressed: _pickAudioTrack,
-                          icon: const Icon(Icons.library_music_outlined),
-                          label: const Text('Choose audio'),
-                        ),
-                        const SizedBox(width: 8),
-                        TextButton.icon(
-                          onPressed: _audioPath == null
-                              ? null
-                              : _clearAudioTrack,
-                          icon: const Icon(Icons.clear),
-                          label: const Text('Clear'),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: _pickAudioTrack,
+                              icon: const Icon(Icons.library_music_outlined),
+                              label: const Text('Choose audio'),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              onPressed: _audioPath == null
+                                  ? null
+                                  : _clearAudioTrack,
+                              icon: const Icon(Icons.clear),
+                              label: const Text('Clear'),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -559,23 +562,30 @@ class _AnimationEditorDialogState extends State<AnimationEditorDialog> {
                       ),
               ),
               const SizedBox(height: 18),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_editingWaypointIndex != null)
+                  if (_editingWaypointIndex != null) ...[
                     TextButton(
                       onPressed: _resetWaypointEditor,
                       child: const Text('Reset waypoint inputs'),
                     ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                  const SizedBox(width: 10),
-                  FilledButton.icon(
-                    onPressed: _saveAnimation,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save animation'),
+                    const SizedBox(height: 10),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 10),
+                      FilledButton.icon(
+                        onPressed: _saveAnimation,
+                        icon: const Icon(Icons.save),
+                        label: const Text('Save animation'),
+                      ),
+                    ],
                   ),
                 ],
               ),
