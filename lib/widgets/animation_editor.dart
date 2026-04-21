@@ -348,7 +348,9 @@ class _AnimationEditorDialogState extends State<AnimationEditorDialog> {
                     _timeController.text = timeMs.toString();
                   },
                   onAddWaypoint: (timeMs) {
-                    final interpolatedAngles = _getInterpolatedAnglesAtTime(timeMs);
+                    final interpolatedAngles = _getInterpolatedAnglesAtTime(
+                      timeMs,
+                    );
                     final draft = WaypointDraft(
                       id: DateTime.now().microsecondsSinceEpoch.toString(),
                       timeMs: timeMs,

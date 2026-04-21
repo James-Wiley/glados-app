@@ -305,7 +305,9 @@ class RobotArmService {
 
     // In bypass mode, succeed silently
     if (_bypassMode) {
-      print('[RobotArm] BYPASS MODE: Would send angles=$angles, speeds=$speeds');
+      print(
+        '[RobotArm] BYPASS MODE: Would send angles=$angles, speeds=$speeds',
+      );
       return const RobotResult.success(null);
     }
 

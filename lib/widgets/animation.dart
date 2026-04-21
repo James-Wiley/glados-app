@@ -276,7 +276,9 @@ class _AnimationPageState extends State<AnimationPage> {
     int playbackToken,
   ) async {
     final waypoints = animation.sortedWaypoints;
-    print('[Animation] Starting playback of "${animation.name}" with ${waypoints.length} waypoints');
+    print(
+      '[Animation] Starting playback of "${animation.name}" with ${waypoints.length} waypoints',
+    );
     if (waypoints.isEmpty) {
       print('[Animation] No waypoints found, skipping animation');
       return;
@@ -284,7 +286,7 @@ class _AnimationPageState extends State<AnimationPage> {
 
     final animationDurationMs = animation.durationMs;
     final animationStartTime = DateTime.now();
-    
+
     // Start audio in parallel
     unawaited(_startAudioPlayback(animation.audioPath));
 
@@ -297,13 +299,17 @@ class _AnimationPageState extends State<AnimationPage> {
       });
     }
 
-    print('[Animation] Starting time-based interpolation (duration: ${animationDurationMs}ms)');
+    print(
+      '[Animation] Starting time-based interpolation (duration: ${animationDurationMs}ms)',
+    );
 
     var lastUpdateMs = 0;
     final animationLoop = () async {
       while (_isPlaybackTokenActive(playbackToken)) {
-        final elapsedMs = DateTime.now().difference(animationStartTime).inMilliseconds;
-        
+        final elapsedMs = DateTime.now()
+            .difference(animationStartTime)
+            .inMilliseconds;
+
         // Only update every ~16ms
         if ((elapsedMs - lastUpdateMs).abs() < 16) {
           await Future.delayed(const Duration(milliseconds: 5));
@@ -313,7 +319,9 @@ class _AnimationPageState extends State<AnimationPage> {
 
         // Animation is complete
         if (elapsedMs >= animationDurationMs) {
-          print('[Animation] Reached end of animation at ${elapsedMs}ms (duration: ${animationDurationMs}ms)');
+          print(
+            '[Animation] Reached end of animation at ${elapsedMs}ms (duration: ${animationDurationMs}ms)',
+          );
           break;
         }
 
@@ -340,11 +348,8 @@ class _AnimationPageState extends State<AnimationPage> {
         // Interpolate servo angles
         final interpolatedAngles = List<double>.generate(
           4,
-          (servoIndex) => _lerp(
-            start.angles[servoIndex],
-            end.angles[servoIndex],
-            t,
-          ),
+          (servoIndex) =>
+              _lerp(start.angles[servoIndex], end.angles[servoIndex], t),
         );
 
         // Send servo command
@@ -394,10 +399,10 @@ class _AnimationPageState extends State<AnimationPage> {
       print('[Animation] Starting audio initialization for: $audioPath');
       await _audioPlayer.stop();
       print('[Animation] Audio player stopped');
-      
+
       await _audioPlayer.setFilePath(audioPath);
       print('[Animation] Audio file path set');
-      
+
       await _audioPlayer.play();
       print('[Animation] Audio playback started');
     } catch (error) {
@@ -408,7 +413,9 @@ class _AnimationPageState extends State<AnimationPage> {
   bool _isPlaybackTokenActive(int playbackToken) {
     final active = mounted && playbackToken == _playbackToken;
     if (!active) {
-      print('[Animation _isPlaybackTokenActive] mounted=$mounted, playbackToken=$playbackToken, _playbackToken=$_playbackToken');
+      print(
+        '[Animation _isPlaybackTokenActive] mounted=$mounted, playbackToken=$playbackToken, _playbackToken=$_playbackToken',
+      );
     }
     return active;
   }
