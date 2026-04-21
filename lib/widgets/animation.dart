@@ -600,7 +600,9 @@ class _AnimationPageState extends State<AnimationPage> {
         color: AppColors.panelMedium.withOpacity(0.9),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isActive ? _accent.withOpacity(0.55) : _panelBorder,
+          color: isActive
+              ? AppColors.accentCyan.withOpacity(0.55)
+              : AppColors.panelBorderAlt,
         ),
       ),
       child: Padding(
@@ -616,9 +618,12 @@ class _AnimationPageState extends State<AnimationPage> {
                   height: 46,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    color: _accent.withOpacity(0.12),
+                    color: AppColors.accentCyan.withOpacity(0.12),
                   ),
-                  child: const Icon(Icons.timeline, color: _accent),
+                  child: const Icon(
+                    Icons.timeline,
+                    color: AppColors.accentCyan,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -636,12 +641,12 @@ class _AnimationPageState extends State<AnimationPage> {
                       const SizedBox(height: 4),
                       Text(
                         '${animation.waypoints.length} waypoint${animation.waypoints.length == 1 ? '' : 's'} · ${_formatDurationMs(animation.durationMs)}',
-                        style: const TextStyle(color: _subtleText),
+                        style: const TextStyle(color: AppColors.textSubtle),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         animation.audioDescription,
-                        style: const TextStyle(color: _subtleText),
+                        style: const TextStyle(color: AppColors.textSubtle),
                       ),
                     ],
                   ),
@@ -702,7 +707,7 @@ class _AnimationPageState extends State<AnimationPage> {
                 Text(
                   'Servo timeline',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: _subtleText,
+                    color: AppColors.textSubtle,
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -730,9 +735,9 @@ class _InfoChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: AppColors.panelBorder),
       ),
-      child: const Text(
+      child: Text(
         '$label: $value',
-        style: TextStyle(
+        style: const TextStyle(
           color: AppColors.textLightest,
           fontSize: 12,
           fontWeight: FontWeight.w600,

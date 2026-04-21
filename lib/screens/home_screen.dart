@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (connectionError != null) {
         return Scaffold(
           body: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

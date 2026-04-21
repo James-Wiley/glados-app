@@ -37,7 +37,7 @@ class _SlidersPageState extends State<SlidersPage> {
   Widget build(BuildContext context) {
     final titleStyle = Theme.of(context).textTheme.headlineSmall;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
